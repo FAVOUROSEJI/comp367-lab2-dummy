@@ -1,15 +1,20 @@
 pipeline {
     agent any
+
     stages {
-       stage('Checkout') {
-    steps {
-        git branch: 'main', url: 'https://github.com/FAVOUROSEJI/comp367-lab2-dummy.git'
-    }
-}        stage('Build') {
+        stage('Checkout') {
+            steps {
+                // Explicitly checkout main branch
+                git branch: 'main', url: 'https://github.com/FAVOUROSEJI/comp367-lab2-dummy.git'
+            }
+        }
+
+        stage('Build') {
             steps {
                 echo "Building dummy project for COMP367"
             }
         }
+
         stage('Greeting') {
             steps {
                 script {
