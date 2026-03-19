@@ -1,28 +1,50 @@
 pipeline {
     agent any
-
+    tools {
+        maven 'Maven3'
+    }
+    environment {
+        DOCKERHUB_PWD = credentials('CredentialID_DockerHubPWD')
+    }
     stages {
         stage('Checkout') {
             steps {
-                // Explicitly checkout main branch
                 git branch: 'main', url: 'https://github.com/FAVOUROSEJI/comp367-lab2-dummy.git'
             }
         }
-
         stage('Build') {
             steps {
-                echo "Building dummy project for COMP367"
+                bat 'mvn clean package'
             }
         }
-
-        stage('Greeting') {
+        stage('Docker build') {
             steps {
                 script {
-                    def hour = new Date().format('HH', TimeZone.getTimeZone('UTC')).toInteger()
-                    def greeting = hour < 12 ? "Good morning" : "Good afternoon"
-                    echo "${greeting}, Favour! Welcome to COMP367"
+                    bat 'docker build -t oseji/maven-webapp:1.0 .'
                 }
             }
+        }
+        stage('Docker login') {
+            steps {
+                script {
+                    bat 'docker login -u oseji -p %DOCKERHUB_PWD%'
+                }
+            }
+        }
+        stage('Docker push') {
+            steps {
+                script {
+                    bat 'docker push oseji/maven-webapp:1.0'
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Build Successful'
+        }
+        failure {
+            echo 'Build Failed'
         }
     }
 }
